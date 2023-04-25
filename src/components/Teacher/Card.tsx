@@ -25,6 +25,12 @@ const AvatarStyle = {
   borderRadius: "50%",
 };
 
+const tagBoxStyle = {
+  width: "100%",
+  display: "flex",
+  justifyContent: "center",
+};
+
 interface Props {
   handleClick: () => void;
   teacher: TeacherUser;
@@ -38,7 +44,11 @@ const Card = ({ handleClick, teacher }: Props) => {
         <Typography>{teacher.name}</Typography>
         <Typography>{teacher.title}</Typography>
         <Box>
-          <Tag />
+          <Box sx={tagBoxStyle}>
+            {teacher.subjects.map((subject) => (
+              <Tag title={subject} key={subject} />
+            ))}
+          </Box>
         </Box>
       </Box>
     </Box>

@@ -1,4 +1,5 @@
 export interface TeacherUser {
+  id: string;
   category: string;
   consult: {
     chat: boolean;

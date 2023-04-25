@@ -1,11 +1,13 @@
 import { Box } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore";
 import Header from "../Common/Header";
 import Card from "./Card";
-import { db } from "../../firabase";
-import { TeacherUser } from "../../Types";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import {
+  fetchTeacherInfoAsync,
+  selectTeachers,
+} from "../../features/teacher/teacherSlice";
 
 const CardsBox = {
   display: "flex",
@@ -17,24 +19,15 @@ const CardsBox = {
 
 const Top = () => {
   const navigate = useNavigate();
-  const [teachers, setTeachers] = useState<TeacherUser[]>([]);
-  const handleClick = () => {
-    navigate("/Teacher/TeacherDetail");
+  const handleClick = (id: string) => {
+    navigate(`/Teacher/TeacherDetail/${id}`);
   };
+  const dispatch = useAppDispatch();
+  const { teachers } = useAppSelector(selectTeachers);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const querySnapshot = await getDocs(collection(db, "TeacherUsers"));
-      const fetchedTeachers: TeacherUser[] = [];
-      querySnapshot.forEach((doc) => {
-        fetchedTeachers.push(doc.data() as TeacherUser);
-      });
-      setTeachers(fetchedTeachers);
-    };
-    fetchData();
-  }, []);
-
-  console.log(teachers);
+    dispatch(fetchTeacherInfoAsync());
+  }, [dispatch]);
 
   return (
     <>
@@ -47,7 +40,7 @@ const Top = () => {
               <Card
                 key={teacher.name}
                 teacher={teacher}
-                handleClick={handleClick}
+                handleClick={() => handleClick(teacher.id)}
               />
             );
           })}
