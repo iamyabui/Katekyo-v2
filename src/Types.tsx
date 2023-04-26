@@ -1,4 +1,5 @@
 export interface TeacherUser {
+  id: string;
   category: string;
   consult: {
     chat: boolean;
@@ -11,4 +12,13 @@ export interface TeacherUser {
   status: boolean;
   subjects: string[];
   title: string;
+  courses?: Courses;
 }
+
+export interface Course {
+  id: string;
+  name: string;
+  price: number;
+}
+
+export type Courses = Course[];

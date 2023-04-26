@@ -2,7 +2,6 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
-// import App from './App';
 import reportWebVitals from "./reportWebVitals";
 import "./index.css";
 import Top from "./components/Teacher/Top";
@@ -18,7 +17,7 @@ const router = createBrowserRouter([
     element: <Top />,
   },
   {
-    path: "/Teacher/TeacherDetail",
+    path: "/Teacher/TeacherDetail/:id",
     element: <TeacherDetail />,
   },
   {
@@ -29,8 +28,9 @@ const router = createBrowserRouter([
 
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
-    <Provider store={store}>{/* <App /> */}</Provider>
+    <Provider store={store}>
+      <RouterProvider router={router} />
+    </Provider>
   </React.StrictMode>
 );
 

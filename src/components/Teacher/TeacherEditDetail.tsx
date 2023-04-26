@@ -28,6 +28,8 @@ import GenericModal from "../Common/GenericModal";
 import PrimaryButton from "../atoms/PrimaryButton";
 import SecondaryButton from "../atoms/SecondaryButton";
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../app/hooks";
+import { selectTeacher } from "../../features/teacher/teacherSlice";
 
 const boxStyle = {
   display: "flex",
@@ -117,6 +119,8 @@ const TeacherEditDetail = () => {
   const [displayStatus, setDisplayStatus] = useState(false);
   const [occupation, setOccupation] = useState("");
   const [open, setOpen] = React.useState(false);
+  const teachers = useAppSelector(selectTeacher);
+  console.log(teachers);
 
   const handleClickOpen = () => {
     setOpen(true);
