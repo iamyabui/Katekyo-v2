@@ -342,7 +342,7 @@ const TeacherEditDetail = () => {
                   <TableBody>
                     {courses.map((course) => (
                       <TableRow
-                        key={course.name}
+                        key={course.id}
                         sx={{
                           "&:last-child td, &:last-child th": { border: 0 },
                         }}
