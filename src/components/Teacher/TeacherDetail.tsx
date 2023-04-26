@@ -13,7 +13,9 @@ import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
+  fetchCourseInfoAsync,
   fetchTeacherInfoAsync,
+  selectCourses,
   selectTeachers,
 } from "../../features/teacher/teacherSlice";
 import CommonButton from "../atoms/CommonButton";
@@ -78,9 +80,16 @@ const TeacherDetail: React.FC = () => {
   };
   const { id } = useParams();
   const { teachers, loading, loaded } = useAppSelector(selectTeachers);
+  const {
+    courses,
+    loading: coursesLoading,
+    loaded: coursesLoaded,
+  } = useAppSelector(selectCourses);
   const teacher = teachers.find((teacher) => teacher.id === id);
 
-  console.log(teachers, loading, loaded);
+  useEffect(() => {
+    if (id) dispatch(fetchCourseInfoAsync(id));
+  }, [dispatch, id]);
 
   useEffect(() => {
     if (!teacher && id) {
@@ -92,26 +101,8 @@ const TeacherDetail: React.FC = () => {
     navigate("/");
   };
 
-  const rows = [
-    {
-      course_name: "コース名",
-      price: 5000,
-      status: "受講中",
-    },
-    {
-      course_name: "コース名",
-      price: 5000,
-      status: "受講中",
-    },
-    {
-      course_name: "コース名",
-      price: 5000,
-      status: "受講中",
-    },
-  ];
-
   const content =
-    !teacher || (!loaded && loading) ? (
+    !teacher || (!loaded && loading && coursesLoading && !coursesLoaded) ? (
       <>
         <Box>loading</Box>
       </>
@@ -179,22 +170,20 @@ const TeacherDetail: React.FC = () => {
                     <TableRow>
                       <TableCell>コース名</TableCell>
                       <TableCell align="right">値段</TableCell>
-                      <TableCell align="right">受講ステータス</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {rows.map((row) => (
+                    {courses.map((course) => (
                       <TableRow
-                        key={row.course_name}
+                        key={course.name}
                         sx={{
                           "&:last-child td, &:last-child th": { border: 0 },
                         }}
                       >
                         <TableCell component="th" scope="row">
-                          {row.course_name}
+                          {course.name}
                         </TableCell>
-                        <TableCell align="right">{row.price}円</TableCell>
-                        <TableCell align="right">{row.status}</TableCell>
+                        <TableCell align="right">{course.price}円</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
