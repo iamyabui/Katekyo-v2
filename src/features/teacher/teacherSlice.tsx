@@ -1,5 +1,12 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../firabase";
 import { Course, Courses, TeacherUser } from "../../Types";
 
@@ -9,6 +16,18 @@ interface initialStateType {
   courses: Courses;
   loading: boolean;
   loaded: boolean;
+  posting: boolean;
+  posted: boolean;
+}
+
+interface PostCourseInfoArgs {
+  teacherId: string;
+  params: { name: string; price: number };
+}
+interface PutCourseInfoArgs {
+  teacherId: string;
+  courseId: string;
+  params: { name: string; price: number };
 }
 
 const initialState: initialStateType = {
@@ -48,6 +67,8 @@ const initialState: initialStateType = {
   courses: [],
   loading: false,
   loaded: false,
+  posting: false,
+  posted: false,
 };
 
 export const fetchTeacherInfoAsync = createAsyncThunk<TeacherUser[]>(
@@ -103,6 +124,35 @@ export const fetchCourseInfoAsync = createAsyncThunk<Courses, string>(
   }
 );
 
+export const postCourseInfoAsync = createAsyncThunk<void, PostCourseInfoArgs>(
+  "teacher/postCourseInfo",
+  async ({ teacherId, params }) => {
+    const coursesCollectionRef = collection(
+      db,
+      `TeacherUsers/${teacherId}/Courses`
+    );
+
+    try {
+      await addDoc(coursesCollectionRef, params);
+    } catch (error) {
+      console.error("Error updating course: ", error);
+    }
+  }
+);
+
+export const putCourseInfoAsync = createAsyncThunk<void, PutCourseInfoArgs>(
+  "teacher/putCourseInfo",
+  async ({ teacherId, courseId, params }) => {
+    const courseRef = doc(db, `TeacherUsers/${teacherId}/Courses/${courseId}`);
+
+    try {
+      await updateDoc(courseRef, params);
+    } catch (error) {
+      console.error("Error updating course: ", error);
+    }
+  }
+);
+
 export const teacherSlice = createSlice({
   name: "teacher",
   initialState,
@@ -147,6 +197,42 @@ export const teacherSlice = createSlice({
       .addCase(fetchCourseInfoAsync.rejected, (state) => {
         state.loading = false;
         state.loaded = false;
+      })
+      .addCase(postCourseInfoAsync.pending, (state) => {
+        state.loading = true;
+        state.loaded = false;
+        state.posting = true;
+        state.posted = false;
+      })
+      .addCase(postCourseInfoAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.loaded = true;
+        state.posting = false;
+        state.posted = true;
+      })
+      .addCase(postCourseInfoAsync.rejected, (state) => {
+        state.loading = false;
+        state.loaded = false;
+        state.posting = false;
+        state.posted = false;
+      })
+      .addCase(putCourseInfoAsync.pending, (state) => {
+        state.loading = true;
+        state.loaded = false;
+        state.posting = true;
+        state.posted = false;
+      })
+      .addCase(putCourseInfoAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.loaded = true;
+        state.posting = false;
+        state.posted = true;
+      })
+      .addCase(putCourseInfoAsync.rejected, (state) => {
+        state.loading = false;
+        state.loaded = false;
+        state.posting = false;
+        state.posted = false;
       });
   },
 });
@@ -169,10 +255,18 @@ export const selectTeacher = (state: {
 
 export const selectCourses = (state: {
   teachers: initialStateType;
-}): { courses: Courses; loading: boolean; loaded: boolean } => ({
+}): {
+  courses: Courses;
+  loading: boolean;
+  loaded: boolean;
+  posting: boolean;
+  posted: boolean;
+} => ({
   courses: state.teachers.courses,
   loading: state.teachers.loading,
   loaded: state.teachers.loaded,
+  posting: state.teachers.posting,
+  posted: state.teachers.posted,
 });
 
 export default teacherSlice.reducer;

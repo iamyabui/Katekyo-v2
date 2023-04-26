@@ -75,9 +75,6 @@ const editButtonStyle = {
 const TeacherDetail: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const handleRedirectEditPage = () => {
-    navigate("/Teacher/TeacherEditDetail");
-  };
   const { id } = useParams();
   const { teachers, loading, loaded } = useAppSelector(selectTeachers);
   const {
@@ -86,6 +83,10 @@ const TeacherDetail: React.FC = () => {
     loaded: coursesLoaded,
   } = useAppSelector(selectCourses);
   const teacher = teachers.find((teacher) => teacher.id === id);
+
+  const handleRedirectEditPage = () => {
+    navigate(`/Teacher/TeacherEditDetail/${id}`);
+  };
 
   useEffect(() => {
     if (id) dispatch(fetchCourseInfoAsync(id));
