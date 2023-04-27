@@ -3,18 +3,21 @@ import React from "react";
 
 interface Props {
   title: string;
+  selected?: boolean;
+  onClick?: () => void;
 }
 
-const tagStyle = {
-  padding: "2px 10px",
-  backgroundColor: "white",
-  borderRadius: "10px",
-  color: "#7835E4",
-};
+const Tag = ({ title, selected = false, onClick }: Props) => {
+  const tagStyle = {
+    padding: "2px 10px",
+    backgroundColor: selected ? "#7835E4" : "#D8D8D8",
+    borderRadius: "10px",
+    color: selected ? "#FFFFFF" : "#7835E4",
+    cursor: onClick ? "pointer" : "default",
+  };
 
-const Tag = ({ title }: Props) => {
   return (
-    <Box>
+    <Box onClick={onClick} sx={{ display: "flex" }}>
       <Typography sx={tagStyle}>{title}</Typography>
     </Box>
   );

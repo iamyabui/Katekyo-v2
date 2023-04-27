@@ -37,6 +37,8 @@ import {
   selectCourses,
   selectTeachers,
 } from "../../features/teacher/teacherSlice";
+import { allSubjects, Subject } from "./AllSubjects";
+import Tag from "../atoms/Tag";
 
 const boxStyle = {
   display: "flex",
@@ -121,6 +123,13 @@ const courseField = {
   display: "flex",
 };
 
+const dialogContent = {
+  marginTop: "10px",
+  display: "flex",
+  flexWrap: "wrap",
+  gap: "5px",
+};
+
 const TeacherEditDetail = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -143,6 +152,7 @@ const TeacherEditDetail = () => {
   const [detail, setDetail] = useState("");
   const [open, setOpen] = React.useState(false);
   const [updateCourse, setUpdateCourse] = useState({ name: "", price: 0 });
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
 
   useEffect(() => {
     if (id || (id && posted && !posting) || (id && deleted && !deleting))
@@ -162,6 +172,7 @@ const TeacherEditDetail = () => {
       setTeacherName(teacher.name);
       setTitle(teacher.title);
       setDetail(teacher.detail);
+      setSelectedSubjects(teacher.subjects);
     }
   }, [teacher]);
 
@@ -171,6 +182,7 @@ const TeacherEditDetail = () => {
 
   const handleClose = () => {
     setOpen(false);
+    setSelectedSubjects(teacher?.subjects || []);
   };
 
   const handleRedirectPage = () => {
@@ -186,6 +198,32 @@ const TeacherEditDetail = () => {
     if (id) dispatch(deleteCourseInfoAsync({ teacherId: id, courseId }));
   };
 
+  const handleSubjectClick = (subject: string) => {
+    setSelectedSubjects((prevSelectedSubjects) => {
+      const isSelected = prevSelectedSubjects.includes(subject);
+      return isSelected
+        ? prevSelectedSubjects.filter((s) => s !== subject)
+        : [...prevSelectedSubjects, subject];
+    });
+  };
+
+  const handleAction = () => {
+    setOpen(false);
+  };
+
+  const modalContent = (
+    <Box sx={dialogContent}>
+      {allSubjects.map((subject, index) => (
+        <Tag
+          key={index}
+          title={Subject[subject as keyof typeof Subject]}
+          selected={selectedSubjects.includes(subject)}
+          onClick={() => handleSubjectClick(subject)}
+        />
+      ))}
+    </Box>
+  );
+
   const content =
     !teacher || (!loaded && loading && coursesLoading && !coursesLoaded) ? (
       <>
@@ -193,7 +231,12 @@ const TeacherEditDetail = () => {
       </>
     ) : (
       <>
-        <GenericModal open={open} handleClose={handleClose} />
+        <GenericModal
+          open={open}
+          handleClose={handleClose}
+          handleAction={handleAction}
+          modalContent={modalContent}
+        />
         <Header />
         <Box sx={boxStyle}>
           <Box sx={leftContainer}>
@@ -244,6 +287,14 @@ const TeacherEditDetail = () => {
                 </Box>
                 <Box sx={eachBox}>
                   <Typography>担当科目</Typography>
+                  <Box sx={{ display: "flex", gap: "5px" }}>
+                    {selectedSubjects.map((subject, index) => (
+                      <Tag
+                        key={index}
+                        title={Subject[subject as keyof typeof Subject]}
+                      />
+                    ))}
+                  </Box>
                   <AddSubjectButton onClick={handleClickOpen} />
                 </Box>
                 <Box>
