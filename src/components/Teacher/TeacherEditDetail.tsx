@@ -18,7 +18,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { BsFillTrashFill } from "react-icons/bs";
 import { BiEdit } from "react-icons/bi";
 import CommonButton from "../atoms/CommonButton";
@@ -34,6 +34,7 @@ import {
   fetchCourseInfoAsync,
   fetchTeacherInfoAsync,
   postCourseInfoAsync,
+  putEachTeacherInfoAsync,
   selectCourses,
   selectTeachers,
 } from "../../features/teacher/teacherSlice";
@@ -153,6 +154,10 @@ const TeacherEditDetail = () => {
   const [open, setOpen] = React.useState(false);
   const [updateCourse, setUpdateCourse] = useState({ name: "", price: 0 });
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [consult, setConsult] = useState({
+    chat: false,
+    video: false,
+  });
 
   useEffect(() => {
     if (id || (id && posted && !posting) || (id && deleted && !deleting))
@@ -173,8 +178,22 @@ const TeacherEditDetail = () => {
       setTitle(teacher.title);
       setDetail(teacher.detail);
       setSelectedSubjects(teacher.subjects);
+      setConsult({
+        chat: teacher.consult.chat,
+        video: teacher.consult.video,
+      });
     }
   }, [teacher]);
+
+  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    console.log(name, checked);
+
+    setConsult((prevSettings) => ({
+      ...prevSettings,
+      [name]: checked,
+    }));
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -196,6 +215,21 @@ const TeacherEditDetail = () => {
 
   const handleDeleteCourse = (courseId: string) => {
     if (id) dispatch(deleteCourseInfoAsync({ teacherId: id, courseId }));
+  };
+
+  const handleSavePage = async () => {
+    const params = {
+      status: displayStatus,
+      category: occupation,
+      name: teacherName,
+      title: title,
+      detail: detail,
+      subjects: selectedSubjects,
+      consult: consult,
+    };
+
+    await dispatch(putEachTeacherInfoAsync({ teacherId: id, params }));
+    navigate(`/Teacher/TeacherDetail/${id}`);
   };
 
   const handleSubjectClick = (subject: string) => {
@@ -287,7 +321,7 @@ const TeacherEditDetail = () => {
                 </Box>
                 <Box sx={eachBox}>
                   <Typography>担当科目</Typography>
-                  <Box sx={{ display: "flex", gap: "5px" }}>
+                  <Box sx={{ display: "flex", gap: "5px", flexFlow: "wrap" }}>
                     {selectedSubjects.map((subject, index) => (
                       <Tag
                         key={index}
@@ -303,13 +337,21 @@ const TeacherEditDetail = () => {
                     <FormGroup>
                       <FormControlLabel
                         control={
-                          <Checkbox checked={teacher?.consult.chat || false} />
+                          <Checkbox
+                            checked={consult.chat}
+                            onChange={handleCheckboxChange}
+                            name="chat"
+                          />
                         }
                         label="チャット相談"
                       />
                       <FormControlLabel
                         control={
-                          <Checkbox checked={teacher?.consult.video || false} />
+                          <Checkbox
+                            checked={consult.video}
+                            onChange={handleCheckboxChange}
+                            name="video"
+                          />
                         }
                         label="ビデオ相談"
                       />
@@ -433,7 +475,7 @@ const TeacherEditDetail = () => {
                 handleAction={handleRedirectPage}
                 title="キャンセル"
               />
-              <SecondaryButton handleAction={handleRedirectPage} title="保存" />
+              <SecondaryButton handleAction={handleSavePage} title="保存" />
             </Box>
           </Box>
         </Box>

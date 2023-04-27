@@ -38,6 +38,11 @@ interface DeleteCourseInfoArgs {
   courseId: string;
 }
 
+// interface PutEachTeacherInfoArgs {
+//   teacherId: string;
+//   params: TeacherUser;
+// }
+
 const initialState: initialStateType = {
   teachers: [
     {
@@ -114,6 +119,18 @@ export const fetchEachTeacherInfoAsync = createAsyncThunk<TeacherUser, string>(
       return teacherData;
     } else {
       throw new Error("Teacher not found");
+    }
+  }
+);
+
+export const putEachTeacherInfoAsync = createAsyncThunk<void, any>(
+  "teacher/putEachTeacherInfo",
+  async ({ teacherId, params }) => {
+    try {
+      const teacherRef = doc(db, "TeacherUsers", teacherId);
+      await updateDoc(teacherRef, params);
+    } catch (error) {
+      console.error("Error updating document: ", error);
     }
   }
 );
@@ -274,6 +291,18 @@ export const teacherSlice = createSlice({
         state.loaded = false;
         state.deleting = false;
         state.deleted = false;
+      })
+      .addCase(putEachTeacherInfoAsync.pending, (state) => {
+        state.loading = true;
+        state.loaded = false;
+      })
+      .addCase(putEachTeacherInfoAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.loaded = true;
+      })
+      .addCase(putEachTeacherInfoAsync.rejected, (state) => {
+        state.loading = false;
+        state.loaded = false;
       });
   },
 });
