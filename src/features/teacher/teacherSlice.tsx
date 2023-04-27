@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -18,6 +19,8 @@ interface initialStateType {
   loaded: boolean;
   posting: boolean;
   posted: boolean;
+  deleting: boolean;
+  deleted: boolean;
 }
 
 interface PostCourseInfoArgs {
@@ -28,6 +31,11 @@ interface PutCourseInfoArgs {
   teacherId: string;
   courseId: string;
   params: { name: string; price: number };
+}
+
+interface DeleteCourseInfoArgs {
+  teacherId: string;
+  courseId: string;
 }
 
 const initialState: initialStateType = {
@@ -69,6 +77,8 @@ const initialState: initialStateType = {
   loaded: false,
   posting: false,
   posted: false,
+  deleting: false,
+  deleted: false,
 };
 
 export const fetchTeacherInfoAsync = createAsyncThunk<TeacherUser[]>(
@@ -153,6 +163,19 @@ export const putCourseInfoAsync = createAsyncThunk<void, PutCourseInfoArgs>(
   }
 );
 
+export const deleteCourseInfoAsync = createAsyncThunk<
+  void,
+  DeleteCourseInfoArgs
+>("teacher/deleteCourseInfo", async ({ teacherId, courseId }) => {
+  const courseRef = doc(db, `TeacherUsers/${teacherId}/Courses/${courseId}`);
+
+  try {
+    await deleteDoc(courseRef);
+  } catch (error) {
+    console.error("Error delete course: ", error);
+  }
+});
+
 export const teacherSlice = createSlice({
   name: "teacher",
   initialState,
@@ -233,6 +256,24 @@ export const teacherSlice = createSlice({
         state.loaded = false;
         state.posting = false;
         state.posted = false;
+      })
+      .addCase(deleteCourseInfoAsync.pending, (state) => {
+        state.loading = true;
+        state.loaded = false;
+        state.deleting = true;
+        state.deleted = false;
+      })
+      .addCase(deleteCourseInfoAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.loaded = true;
+        state.deleting = false;
+        state.deleted = true;
+      })
+      .addCase(deleteCourseInfoAsync.rejected, (state) => {
+        state.loading = false;
+        state.loaded = false;
+        state.deleting = false;
+        state.deleted = false;
       });
   },
 });
@@ -261,12 +302,16 @@ export const selectCourses = (state: {
   loaded: boolean;
   posting: boolean;
   posted: boolean;
+  deleting: boolean;
+  deleted: boolean;
 } => ({
   courses: state.teachers.courses,
   loading: state.teachers.loading,
   loaded: state.teachers.loaded,
   posting: state.teachers.posting,
   posted: state.teachers.posted,
+  deleting: state.teachers.deleting,
+  deleted: state.teachers.deleted,
 });
 
 export default teacherSlice.reducer;

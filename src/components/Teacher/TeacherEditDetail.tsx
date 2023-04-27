@@ -30,6 +30,7 @@ import SecondaryButton from "../atoms/SecondaryButton";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
+  deleteCourseInfoAsync,
   fetchCourseInfoAsync,
   fetchTeacherInfoAsync,
   postCourseInfoAsync,
@@ -131,6 +132,8 @@ const TeacherEditDetail = () => {
     posted,
     loading: coursesLoading,
     loaded: coursesLoaded,
+    deleting,
+    deleted,
   } = useAppSelector(selectCourses);
   const teacher = teachers.find((teacher) => teacher.id === id);
   const [displayStatus, setDisplayStatus] = useState(false);
@@ -142,8 +145,9 @@ const TeacherEditDetail = () => {
   const [updateCourse, setUpdateCourse] = useState({ name: "", price: 0 });
 
   useEffect(() => {
-    if (id || (id && posted && !posting)) dispatch(fetchCourseInfoAsync(id));
-  }, [dispatch, id, posted, posting]);
+    if (id || (id && posted && !posting) || (id && deleted && !deleting))
+      dispatch(fetchCourseInfoAsync(id));
+  }, [dispatch, id, posted, posting, deleted, deleting]);
 
   useEffect(() => {
     if (!teacher && id) {
@@ -176,6 +180,10 @@ const TeacherEditDetail = () => {
   const handleAddCourse = () => {
     if (id)
       dispatch(postCourseInfoAsync({ teacherId: id, params: updateCourse }));
+  };
+
+  const handleDeleteCourse = (courseId: string) => {
+    if (id) dispatch(deleteCourseInfoAsync({ teacherId: id, courseId }));
   };
 
   const content =
@@ -328,40 +336,46 @@ const TeacherEditDetail = () => {
                 />
                 <CommonButton onClick={handleAddCourse} title="追加" />
               </Box>
-
-              <TableContainer>
-                <Table sx={{ minWidth: 500 }} aria-label="simple table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>コース名</TableCell>
-                      <TableCell align="right">値段</TableCell>
-                      <TableCell align="right"></TableCell>
-                      <TableCell align="right"></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {courses.map((course) => (
-                      <TableRow
-                        key={course.id}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell component="th" scope="row">
-                          {course.name}
-                        </TableCell>
-                        <TableCell align="right">{course.price}円</TableCell>
-                        <TableCell align="center">
-                          <BsFillTrashFill />
-                        </TableCell>
-                        <TableCell align="center">
-                          <BiEdit />
-                        </TableCell>
+              {!deleting ? (
+                <TableContainer>
+                  <Table sx={{ minWidth: 500 }} aria-label="simple table">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>コース名</TableCell>
+                        <TableCell align="right">値段</TableCell>
+                        <TableCell align="right"></TableCell>
+                        <TableCell align="right"></TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {courses.map((course) => (
+                        <TableRow
+                          key={course.id}
+                          sx={{
+                            "&:last-child td, &:last-child th": { border: 0 },
+                          }}
+                        >
+                          <TableCell component="th" scope="row">
+                            {course.name}
+                          </TableCell>
+                          <TableCell align="right">{course.price}円</TableCell>
+                          <TableCell align="center">
+                            <BsFillTrashFill
+                              onClick={() => handleDeleteCourse(course.id)}
+                              style={{ cursor: "pointer" }}
+                            />
+                          </TableCell>
+                          <TableCell align="center">
+                            <BiEdit style={{ cursor: "pointer" }} />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <div>loading...</div>
+              )}
             </Box>
             <Box sx={editButtonStyle}>
               <PrimaryButton
