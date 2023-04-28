@@ -114,7 +114,7 @@ const TeacherDetail: React.FC = () => {
           <Box sx={profileStyle}>
             <Typography>Profile</Typography>
             <Avatar
-              src="/images/yamada.png"
+              src={teacher.url}
               alt="User Image"
               sx={{
                 width: 70,
@@ -195,10 +195,12 @@ const TeacherDetail: React.FC = () => {
               <PrimaryButton
                 handleAction={handleRedirectEditPage}
                 title="編集"
+                loading={false}
               />
               <SecondaryButton
                 handleAction={handleRedirectList}
                 title="一覧に戻る"
+                loading={false}
               />
             </Box>
           </Box>

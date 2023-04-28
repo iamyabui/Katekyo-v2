@@ -10,6 +10,10 @@ interface Props {
   handleClose: () => void;
   handleAction: () => void;
   modalContent: JSX.Element;
+  title: string;
+  primaryButtonTitle: string;
+  secondaryButtonTitle: string;
+  loading: boolean;
 }
 
 const dialogTopStyle = {
@@ -25,6 +29,10 @@ export default function GenericModal({
   handleClose,
   handleAction,
   modalContent,
+  title,
+  primaryButtonTitle,
+  secondaryButtonTitle,
+  loading,
 }: Props) {
   return (
     <div>
@@ -35,11 +43,19 @@ export default function GenericModal({
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle sx={dialogTopStyle}>{"担当科目の選択"}</DialogTitle>
+        <DialogTitle sx={dialogTopStyle}>{title}</DialogTitle>
         <DialogContent>{modalContent}</DialogContent>
         <DialogActions sx={{ gap: "10px" }}>
-          <PrimaryButton handleAction={handleClose} title="キャンセル" />
-          <SecondaryButton handleAction={handleAction} title="保存" />
+          <PrimaryButton
+            handleAction={handleClose}
+            title={primaryButtonTitle}
+            loading={loading}
+          />
+          <SecondaryButton
+            handleAction={handleAction}
+            title={secondaryButtonTitle}
+            loading={loading}
+          />
         </DialogActions>
       </Dialog>
     </div>

@@ -40,6 +40,7 @@ import {
 } from "../../features/teacher/teacherSlice";
 import { allSubjects, Subject } from "./AllSubjects";
 import Tag from "../atoms/Tag";
+import { ImageModal } from "../Common/ImageModal";
 
 const boxStyle = {
   display: "flex",
@@ -152,12 +153,14 @@ const TeacherEditDetail = () => {
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [open, setOpen] = React.useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
   const [updateCourse, setUpdateCourse] = useState({ name: "", price: 0 });
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [consult, setConsult] = useState({
     chat: false,
     video: false,
   });
+  const [imageURL, setImageURL] = useState("");
 
   useEffect(() => {
     if (id || (id && posted && !posting) || (id && deleted && !deleting))
@@ -182,6 +185,7 @@ const TeacherEditDetail = () => {
         chat: teacher.consult.chat,
         video: teacher.consult.video,
       });
+      setImageURL(teacher.url);
     }
   }, [teacher]);
 
@@ -226,6 +230,7 @@ const TeacherEditDetail = () => {
       detail: detail,
       subjects: selectedSubjects,
       consult: consult,
+      url: imageURL,
     };
 
     await dispatch(putEachTeacherInfoAsync({ teacherId: id, params }));
@@ -265,11 +270,22 @@ const TeacherEditDetail = () => {
       </>
     ) : (
       <>
+        <ImageModal
+          imageModalOpen={imageModalOpen}
+          setImageModalOpen={setImageModalOpen}
+          id={id || ""}
+          setImageURL={setImageURL}
+          imageURL={imageURL}
+        />
         <GenericModal
           open={open}
           handleClose={handleClose}
           handleAction={handleAction}
           modalContent={modalContent}
+          title="担当科目の選択"
+          primaryButtonTitle="キャンセル"
+          secondaryButtonTitle="保存"
+          loading={false}
         />
         <Header />
         <Box sx={boxStyle}>
@@ -277,7 +293,7 @@ const TeacherEditDetail = () => {
             <Box sx={profileStyle}>
               <Typography>Profile</Typography>
               <Avatar
-                src="/images/yamada.png"
+                src={imageURL}
                 alt="User Image"
                 sx={{
                   width: 70,
@@ -286,7 +302,10 @@ const TeacherEditDetail = () => {
                   backgroundColor: "white",
                 }}
               />
-              <CommonButton onClick={handleAddCourse} title="写真を変更" />
+              <CommonButton
+                onClick={() => setImageModalOpen(true)}
+                title="写真を変更"
+              />
               <Box sx={detailProfileBox}>
                 <Box sx={eachBox}>
                   <Typography>名前※</Typography>
@@ -474,8 +493,13 @@ const TeacherEditDetail = () => {
               <PrimaryButton
                 handleAction={handleRedirectPage}
                 title="キャンセル"
+                loading={false}
               />
-              <SecondaryButton handleAction={handleSavePage} title="保存" />
+              <SecondaryButton
+                handleAction={handleSavePage}
+                title="保存"
+                loading={false}
+              />
             </Box>
           </Box>
         </Box>

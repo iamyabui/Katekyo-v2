@@ -59,6 +59,7 @@ const initialState: initialStateType = {
       status: false,
       subjects: [],
       title: "",
+      url: "",
     },
   ],
   teacher: {
@@ -76,6 +77,7 @@ const initialState: initialStateType = {
     subjects: [],
     title: "",
     courses: [],
+    url: "",
   },
   courses: [],
   loading: false,
