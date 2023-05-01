@@ -13,6 +13,7 @@ export interface TeacherUser {
   subjects: string[];
   title: string;
   courses?: Courses;
+  url: string;
 }
 
 export interface Course {

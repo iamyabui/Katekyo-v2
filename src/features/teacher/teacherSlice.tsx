@@ -1,5 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+} from "firebase/firestore";
 import { db } from "../../firabase";
 import { Course, Courses, TeacherUser } from "../../Types";
 
@@ -9,7 +17,31 @@ interface initialStateType {
   courses: Courses;
   loading: boolean;
   loaded: boolean;
+  posting: boolean;
+  posted: boolean;
+  deleting: boolean;
+  deleted: boolean;
 }
+
+interface PostCourseInfoArgs {
+  teacherId: string;
+  params: { name: string; price: number };
+}
+interface PutCourseInfoArgs {
+  teacherId: string;
+  courseId: string;
+  params: { name: string; price: number };
+}
+
+interface DeleteCourseInfoArgs {
+  teacherId: string;
+  courseId: string;
+}
+
+// interface PutEachTeacherInfoArgs {
+//   teacherId: string;
+//   params: TeacherUser;
+// }
 
 const initialState: initialStateType = {
   teachers: [
@@ -27,6 +59,7 @@ const initialState: initialStateType = {
       status: false,
       subjects: [],
       title: "",
+      url: "",
     },
   ],
   teacher: {
@@ -44,10 +77,15 @@ const initialState: initialStateType = {
     subjects: [],
     title: "",
     courses: [],
+    url: "",
   },
   courses: [],
   loading: false,
   loaded: false,
+  posting: false,
+  posted: false,
+  deleting: false,
+  deleted: false,
 };
 
 export const fetchTeacherInfoAsync = createAsyncThunk<TeacherUser[]>(
@@ -87,6 +125,18 @@ export const fetchEachTeacherInfoAsync = createAsyncThunk<TeacherUser, string>(
   }
 );
 
+export const putEachTeacherInfoAsync = createAsyncThunk<void, any>(
+  "teacher/putEachTeacherInfo",
+  async ({ teacherId, params }) => {
+    try {
+      const teacherRef = doc(db, "TeacherUsers", teacherId);
+      await updateDoc(teacherRef, params);
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
+  }
+);
+
 export const fetchCourseInfoAsync = createAsyncThunk<Courses, string>(
   "teacher/fetchCourseInfo",
   async (teacherId) => {
@@ -102,6 +152,48 @@ export const fetchCourseInfoAsync = createAsyncThunk<Courses, string>(
     return courses;
   }
 );
+
+export const postCourseInfoAsync = createAsyncThunk<void, PostCourseInfoArgs>(
+  "teacher/postCourseInfo",
+  async ({ teacherId, params }) => {
+    const coursesCollectionRef = collection(
+      db,
+      `TeacherUsers/${teacherId}/Courses`
+    );
+
+    try {
+      await addDoc(coursesCollectionRef, params);
+    } catch (error) {
+      console.error("Error updating course: ", error);
+    }
+  }
+);
+
+export const putCourseInfoAsync = createAsyncThunk<void, PutCourseInfoArgs>(
+  "teacher/putCourseInfo",
+  async ({ teacherId, courseId, params }) => {
+    const courseRef = doc(db, `TeacherUsers/${teacherId}/Courses/${courseId}`);
+
+    try {
+      await updateDoc(courseRef, params);
+    } catch (error) {
+      console.error("Error updating course: ", error);
+    }
+  }
+);
+
+export const deleteCourseInfoAsync = createAsyncThunk<
+  void,
+  DeleteCourseInfoArgs
+>("teacher/deleteCourseInfo", async ({ teacherId, courseId }) => {
+  const courseRef = doc(db, `TeacherUsers/${teacherId}/Courses/${courseId}`);
+
+  try {
+    await deleteDoc(courseRef);
+  } catch (error) {
+    console.error("Error delete course: ", error);
+  }
+});
 
 export const teacherSlice = createSlice({
   name: "teacher",
@@ -147,6 +239,72 @@ export const teacherSlice = createSlice({
       .addCase(fetchCourseInfoAsync.rejected, (state) => {
         state.loading = false;
         state.loaded = false;
+      })
+      .addCase(postCourseInfoAsync.pending, (state) => {
+        state.loading = true;
+        state.loaded = false;
+        state.posting = true;
+        state.posted = false;
+      })
+      .addCase(postCourseInfoAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.loaded = true;
+        state.posting = false;
+        state.posted = true;
+      })
+      .addCase(postCourseInfoAsync.rejected, (state) => {
+        state.loading = false;
+        state.loaded = false;
+        state.posting = false;
+        state.posted = false;
+      })
+      .addCase(putCourseInfoAsync.pending, (state) => {
+        state.loading = true;
+        state.loaded = false;
+        state.posting = true;
+        state.posted = false;
+      })
+      .addCase(putCourseInfoAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.loaded = true;
+        state.posting = false;
+        state.posted = true;
+      })
+      .addCase(putCourseInfoAsync.rejected, (state) => {
+        state.loading = false;
+        state.loaded = false;
+        state.posting = false;
+        state.posted = false;
+      })
+      .addCase(deleteCourseInfoAsync.pending, (state) => {
+        state.loading = true;
+        state.loaded = false;
+        state.deleting = true;
+        state.deleted = false;
+      })
+      .addCase(deleteCourseInfoAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.loaded = true;
+        state.deleting = false;
+        state.deleted = true;
+      })
+      .addCase(deleteCourseInfoAsync.rejected, (state) => {
+        state.loading = false;
+        state.loaded = false;
+        state.deleting = false;
+        state.deleted = false;
+      })
+      .addCase(putEachTeacherInfoAsync.pending, (state) => {
+        state.loading = true;
+        state.loaded = false;
+      })
+      .addCase(putEachTeacherInfoAsync.fulfilled, (state, action) => {
+        state.loading = false;
+        state.loaded = true;
+      })
+      .addCase(putEachTeacherInfoAsync.rejected, (state) => {
+        state.loading = false;
+        state.loaded = false;
       });
   },
 });
@@ -169,10 +327,22 @@ export const selectTeacher = (state: {
 
 export const selectCourses = (state: {
   teachers: initialStateType;
-}): { courses: Courses; loading: boolean; loaded: boolean } => ({
+}): {
+  courses: Courses;
+  loading: boolean;
+  loaded: boolean;
+  posting: boolean;
+  posted: boolean;
+  deleting: boolean;
+  deleted: boolean;
+} => ({
   courses: state.teachers.courses,
   loading: state.teachers.loading,
   loaded: state.teachers.loaded,
+  posting: state.teachers.posting,
+  posted: state.teachers.posted,
+  deleting: state.teachers.deleting,
+  deleted: state.teachers.deleted,
 });
 
 export default teacherSlice.reducer;

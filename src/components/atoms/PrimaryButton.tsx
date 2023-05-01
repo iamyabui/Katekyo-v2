@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material";
+import { Box, Button, CircularProgress } from "@mui/material";
 import React from "react";
 
 const ButtonStyle = {
@@ -18,13 +18,18 @@ const ButtonStyle = {
 interface Props {
   title: string;
   handleAction: () => void;
+  loading: boolean;
 }
 
-const PrimaryButton = ({ title, handleAction }: Props) => {
-  return (
+const PrimaryButton = ({ title, handleAction, loading }: Props) => {
+  return !loading ? (
     <Box onClick={handleAction}>
       <Button sx={ButtonStyle}>{title}</Button>
     </Box>
+  ) : (
+    <Button sx={ButtonStyle}>
+      <CircularProgress color="inherit" size={25} />
+    </Button>
   );
 };
 

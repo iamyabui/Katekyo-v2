@@ -75,9 +75,6 @@ const editButtonStyle = {
 const TeacherDetail: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const handleRedirectEditPage = () => {
-    navigate("/Teacher/TeacherEditDetail");
-  };
   const { id } = useParams();
   const { teachers, loading, loaded } = useAppSelector(selectTeachers);
   const {
@@ -86,6 +83,10 @@ const TeacherDetail: React.FC = () => {
     loaded: coursesLoaded,
   } = useAppSelector(selectCourses);
   const teacher = teachers.find((teacher) => teacher.id === id);
+
+  const handleRedirectEditPage = () => {
+    navigate(`/Teacher/TeacherEditDetail/${id}`);
+  };
 
   useEffect(() => {
     if (id) dispatch(fetchCourseInfoAsync(id));
@@ -113,7 +114,7 @@ const TeacherDetail: React.FC = () => {
           <Box sx={profileStyle}>
             <Typography>Profile</Typography>
             <Avatar
-              src="/images/yamada.png"
+              src={teacher.url}
               alt="User Image"
               sx={{
                 width: 70,
@@ -194,10 +195,12 @@ const TeacherDetail: React.FC = () => {
               <PrimaryButton
                 handleAction={handleRedirectEditPage}
                 title="編集"
+                loading={false}
               />
               <SecondaryButton
                 handleAction={handleRedirectList}
                 title="一覧に戻る"
+                loading={false}
               />
             </Box>
           </Box>
