@@ -34,6 +34,7 @@ import {
   fetchCourseInfoAsync,
   fetchTeacherInfoAsync,
   postCourseInfoAsync,
+  putCourseInfoAsync,
   putEachTeacherInfoAsync,
   selectCourses,
   selectTeachers,
@@ -154,13 +155,18 @@ const TeacherEditDetail = () => {
   const [detail, setDetail] = useState("");
   const [open, setOpen] = React.useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
-  const [updateCourse, setUpdateCourse] = useState({ name: "", price: 0 });
+  const [updateCourse, setUpdateCourse] = useState({
+    name: "",
+    price: 0,
+    id: "",
+  });
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [consult, setConsult] = useState({
     chat: false,
     video: false,
   });
   const [imageURL, setImageURL] = useState("");
+  const [isCourseEdit, setIsCourseEdit] = useState(false);
 
   useEffect(() => {
     if (id || (id && posted && !posting) || (id && deleted && !deleting))
@@ -214,7 +220,43 @@ const TeacherEditDetail = () => {
 
   const handleAddCourse = () => {
     if (id)
-      dispatch(postCourseInfoAsync({ teacherId: id, params: updateCourse }));
+      dispatch(
+        postCourseInfoAsync({
+          teacherId: id,
+          params: { name: updateCourse.name, price: updateCourse.price },
+        })
+      );
+  };
+
+  const handleEditCourse = (courseID: string) => {
+    const editCourse = courses.find((course) => course.id === courseID);
+    if (editCourse)
+      setUpdateCourse({
+        name: editCourse.name,
+        price: editCourse?.price,
+        id: courseID,
+      });
+    setIsCourseEdit(true);
+  };
+
+  const handleSaveCourse = () => {
+    if (id)
+      dispatch(
+        putCourseInfoAsync({
+          teacherId: id,
+          courseId: updateCourse.id,
+          params: {
+            name: updateCourse.name,
+            price: updateCourse.price,
+          },
+        })
+      );
+    setIsCourseEdit(false);
+    setUpdateCourse({
+      name: "",
+      price: 0,
+      id: "",
+    });
   };
 
   const handleDeleteCourse = (courseId: string) => {
@@ -446,7 +488,11 @@ const TeacherEditDetail = () => {
                   placeholder="料金"
                   sx={TextFieldStyle}
                 />
-                <CommonButton onClick={handleAddCourse} title="追加" />
+                {isCourseEdit ? (
+                  <CommonButton onClick={handleSaveCourse} title="保存" />
+                ) : (
+                  <CommonButton onClick={handleAddCourse} title="追加" />
+                )}
               </Box>
               {!deleting ? (
                 <TableContainer>
@@ -472,13 +518,20 @@ const TeacherEditDetail = () => {
                           </TableCell>
                           <TableCell align="right">{course.price}円</TableCell>
                           <TableCell align="center">
-                            <BsFillTrashFill
-                              onClick={() => handleDeleteCourse(course.id)}
-                              style={{ cursor: "pointer" }}
-                            />
+                            {isCourseEdit ? null : (
+                              <BsFillTrashFill
+                                onClick={() => handleDeleteCourse(course.id)}
+                                style={{ cursor: "pointer" }}
+                              />
+                            )}
                           </TableCell>
                           <TableCell align="center">
-                            <BiEdit style={{ cursor: "pointer" }} />
+                            {isCourseEdit ? null : (
+                              <BiEdit
+                                onClick={() => handleEditCourse(course.id)}
+                                style={{ cursor: "pointer" }}
+                              />
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}
