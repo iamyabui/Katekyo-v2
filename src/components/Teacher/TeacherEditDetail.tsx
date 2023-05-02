@@ -30,11 +30,8 @@ import SecondaryButton from "../atoms/SecondaryButton";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import {
-  deleteCourseInfoAsync,
   fetchCourseInfoAsync,
   fetchTeacherInfoAsync,
-  postCourseInfoAsync,
-  putCourseInfoAsync,
   putEachTeacherInfoAsync,
   selectCourses,
   selectTeachers,
@@ -42,6 +39,8 @@ import {
 import { allSubjects, Subject } from "./AllSubjects";
 import Tag from "../atoms/Tag";
 import { ImageModal } from "../Common/ImageModal";
+import { Courses } from "../../Types";
+import { addCourse } from "../../utils/AddCourse";
 
 const boxStyle = {
   display: "flex",
@@ -124,6 +123,7 @@ const eachBox = {
 const courseField = {
   gap: "10px",
   display: "flex",
+  width: "100%",
 };
 
 const dialogContent = {
@@ -155,6 +155,7 @@ const TeacherEditDetail = () => {
   const [detail, setDetail] = useState("");
   const [open, setOpen] = React.useState(false);
   const [imageModalOpen, setImageModalOpen] = useState(false);
+  const [registerCourses, setRegisterCourses] = useState<Courses>([]);
   const [updateCourse, setUpdateCourse] = useState({
     name: "",
     price: 0,
@@ -192,8 +193,12 @@ const TeacherEditDetail = () => {
         video: teacher.consult.video,
       });
       setImageURL(teacher.url);
+      setRegisterCourses(courses);
     }
-  }, [teacher]);
+    if (courses) {
+      setRegisterCourses(courses);
+    }
+  }, [teacher, courses]);
 
   const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -219,13 +224,19 @@ const TeacherEditDetail = () => {
   };
 
   const handleAddCourse = () => {
-    if (id)
-      dispatch(
-        postCourseInfoAsync({
-          teacherId: id,
-          params: { name: updateCourse.name, price: updateCourse.price },
-        })
-      );
+    setRegisterCourses([...registerCourses, updateCourse]);
+    setUpdateCourse({
+      name: "",
+      price: 0,
+      id: "",
+    });
+    // if (id)
+    //   dispatch(
+    //     postCourseInfoAsync({
+    //       teacherId: id,
+    //       params: { name: updateCourse.name, price: updateCourse.price },
+    //     })
+    //   );
   };
 
   const handleEditCourse = (courseID: string) => {
@@ -239,18 +250,39 @@ const TeacherEditDetail = () => {
     setIsCourseEdit(true);
   };
 
+  const handleCancelEdit = () => {
+    setUpdateCourse({
+      name: "",
+      price: 0,
+      id: "",
+    });
+    setIsCourseEdit(false);
+  };
+
   const handleSaveCourse = () => {
-    if (id)
-      dispatch(
-        putCourseInfoAsync({
-          teacherId: id,
-          courseId: updateCourse.id,
-          params: {
-            name: updateCourse.name,
-            price: updateCourse.price,
-          },
-        })
-      );
+    // if (id)
+    //   dispatch(
+    //     putCourseInfoAsync({
+    //       teacherId: id,
+    //       courseId: updateCourse.id,
+    //       params: {
+    //         name: updateCourse.name,
+    //         price: updateCourse.price,
+    //       },
+    //     })
+    //   );
+    const tempCourses = registerCourses.map((course) => {
+      if (course.id === updateCourse.id) {
+        return {
+          ...course,
+          name: updateCourse.name,
+          price: updateCourse.price,
+        };
+      } else {
+        return course;
+      }
+    });
+    setRegisterCourses(tempCourses);
     setIsCourseEdit(false);
     setUpdateCourse({
       name: "",
@@ -260,7 +292,11 @@ const TeacherEditDetail = () => {
   };
 
   const handleDeleteCourse = (courseId: string) => {
-    if (id) dispatch(deleteCourseInfoAsync({ teacherId: id, courseId }));
+    // if (id) dispatch(deleteCourseInfoAsync({ teacherId: id, courseId }));
+    const tempCourses = registerCourses.filter(
+      (course) => course.id !== courseId
+    );
+    setRegisterCourses(tempCourses);
   };
 
   const handleSavePage = async () => {
@@ -276,6 +312,11 @@ const TeacherEditDetail = () => {
     };
 
     await dispatch(putEachTeacherInfoAsync({ teacherId: id, params }));
+
+    if (id) {
+      const result = addCourse(registerCourses, courses, id, dispatch);
+      console.log(result);
+    }
     navigate(`/Teacher/TeacherDetail/${id}`);
   };
 
@@ -472,7 +513,7 @@ const TeacherEditDetail = () => {
                     }))
                   }
                   placeholder="コース名"
-                  sx={TextFieldStyle}
+                  sx={{ ...TextFieldStyle, maxWidth: 200 }}
                 />
                 <TextField
                   value={updateCourse.price}
@@ -486,10 +527,16 @@ const TeacherEditDetail = () => {
                     }))
                   }
                   placeholder="料金"
-                  sx={TextFieldStyle}
+                  sx={{ ...TextFieldStyle, maxWidth: 100 }}
                 />
                 {isCourseEdit ? (
-                  <CommonButton onClick={handleSaveCourse} title="保存" />
+                  <>
+                    <CommonButton onClick={handleSaveCourse} title="保存" />
+                    <CommonButton
+                      onClick={handleCancelEdit}
+                      title="キャンセル"
+                    />
+                  </>
                 ) : (
                   <CommonButton onClick={handleAddCourse} title="追加" />
                 )}
@@ -506,7 +553,7 @@ const TeacherEditDetail = () => {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {courses.map((course) => (
+                      {registerCourses.map((course) => (
                         <TableRow
                           key={course.id}
                           sx={{
@@ -550,7 +597,7 @@ const TeacherEditDetail = () => {
               />
               <SecondaryButton
                 handleAction={handleSavePage}
-                title="保存"
+                title="変更を保存"
                 loading={false}
               />
             </Box>
