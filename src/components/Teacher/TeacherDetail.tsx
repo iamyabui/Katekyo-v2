@@ -41,6 +41,7 @@ const profileStyle = {
   borderRadius: "10px",
   paddingTop: "20px",
   paddingBottom: "20px",
+  paddingInline: "10px",
 };
 
 const detailBoxStyle = {
@@ -59,6 +60,8 @@ const tagBoxStyle = {
   width: "100%",
   display: "flex",
   justifyContent: "center",
+  flexWrap: "wrap",
+  gap: "5px",
 };
 
 const textBoxStyle = {

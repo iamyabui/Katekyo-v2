@@ -41,6 +41,8 @@ import Tag from "../atoms/Tag";
 import { ImageModal } from "../Common/ImageModal";
 import { Courses } from "../../Types";
 import { addCourse } from "../../utils/AddCourse";
+import { editCourse } from "../../utils/EditCourse";
+import { deleteCourse } from "../../utils/deleteCourse";
 
 const boxStyle = {
   display: "flex",
@@ -314,8 +316,9 @@ const TeacherEditDetail = () => {
     await dispatch(putEachTeacherInfoAsync({ teacherId: id, params }));
 
     if (id) {
-      const result = addCourse(registerCourses, courses, id, dispatch);
-      console.log(result);
+      addCourse(registerCourses, courses, id, dispatch);
+      editCourse(registerCourses, courses, id, dispatch);
+      deleteCourse(registerCourses, courses, id, dispatch);
     }
     navigate(`/Teacher/TeacherDetail/${id}`);
   };
