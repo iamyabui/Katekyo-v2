@@ -1,24 +1,33 @@
 import { Alert, Snackbar } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
-import { selectToast, toggle } from "../../features/toast/toastSlice";
+import { closeToast, selectToast } from "../../features/toast/toastSlice";
 
-const Toast = () => {
+interface Props {
+  successMessage: string;
+  errorMessage: string;
+}
+
+const Toast = ({ successMessage, errorMessage }: Props) => {
   const dispatch = useAppDispatch();
-  const { open } = useAppSelector(selectToast);
+  const { open, status } = useAppSelector(selectToast);
+
+  const handleCloseAlert = () => {
+    dispatch(closeToast());
+  };
 
   return (
     <Snackbar
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
       open={open}
       autoHideDuration={6000}
-      onClose={() => dispatch(toggle())}
+      onClose={handleCloseAlert}
     >
       <Alert
-        onClose={() => dispatch(toggle())}
-        severity="success"
+        onClose={handleCloseAlert}
+        severity={status === "Success" ? "success" : "error"}
         sx={{ width: "100%" }}
       >
-        変更が保存されました!
+        {status === "Success" ? successMessage : errorMessage}
       </Alert>
     </Snackbar>
   );

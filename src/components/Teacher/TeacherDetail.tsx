@@ -114,7 +114,10 @@ const TeacherDetail: React.FC = () => {
       </>
     ) : (
       <>
-        <Toast />
+        <Toast
+          successMessage="変更が保存されました！"
+          errorMessage="保存に失敗しました。"
+        />
         <Header />
         <Box sx={boxStyle}>
           <Box sx={profileStyle}>

@@ -44,7 +44,11 @@ import { addCourse } from "../../utils/AddCourse";
 import { editCourse } from "../../utils/EditCourse";
 import { deleteCourse } from "../../utils/deleteCourse";
 import EditCancelModal from "../Common/EditCancelModal";
-import { toggle } from "../../features/toast/toastSlice";
+import {
+  setErrorMessage,
+  setSuccessMessage,
+} from "../../features/toast/toastSlice";
+import Toast from "../Common/Toast";
 
 const boxStyle = {
   display: "flex",
@@ -296,18 +300,48 @@ const TeacherEditDetail = () => {
       url: imageURL,
     };
 
-    await dispatch(putEachTeacherInfoAsync({ teacherId: id, params }));
-
     if (id) {
-      addCourse(registerCourses, courses, id, dispatch);
-      editCourse(registerCourses, courses, id, dispatch);
-      deleteCourse(registerCourses, courses, id, dispatch);
-      dispatch(fetchCourseInfoAsync(id));
-      dispatch(fetchTeacherInfoAsync());
-    }
+      const putTeacherInfoPromise = dispatch(
+        putEachTeacherInfoAsync({ teacherId: id, params })
+      );
+      const addCoursePromise = addCourse(
+        registerCourses,
+        courses,
+        id,
+        dispatch
+      );
+      const editCoursePromise = editCourse(
+        registerCourses,
+        courses,
+        id,
+        dispatch
+      );
+      const deleteCoursePromise = deleteCourse(
+        registerCourses,
+        courses,
+        id,
+        dispatch
+      );
+      const fetchCourseInfoPromise = dispatch(fetchCourseInfoAsync(id));
+      const fetchTeacherInfoPromise = dispatch(fetchTeacherInfoAsync());
 
-    navigate(`/Teacher/TeacherDetail/${id}`);
-    dispatch(toggle());
+      try {
+        await Promise.all([
+          putTeacherInfoPromise,
+          addCoursePromise,
+          editCoursePromise,
+          deleteCoursePromise,
+          fetchCourseInfoPromise,
+          fetchTeacherInfoPromise,
+        ]);
+      } catch (error) {
+        dispatch(setErrorMessage());
+        return;
+      }
+
+      navigate(`/Teacher/TeacherDetail/${id}`);
+      dispatch(setSuccessMessage());
+    }
   };
 
   const handleSubjectClick = (subject: string) => {
@@ -343,6 +377,10 @@ const TeacherEditDetail = () => {
       </>
     ) : (
       <>
+        <Toast
+          successMessage="変更が保存されました！"
+          errorMessage="保存に失敗しました。"
+        />
         <EditCancelModal
           open={editCancelModalOpen}
           handleClose={() => setEditCancelModalOpen(false)}
