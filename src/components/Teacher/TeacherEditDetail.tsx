@@ -43,6 +43,8 @@ import { Courses } from "../../Types";
 import { addCourse } from "../../utils/AddCourse";
 import { editCourse } from "../../utils/EditCourse";
 import { deleteCourse } from "../../utils/deleteCourse";
+import EditCancelModal from "../Common/EditCancelModal";
+import { toggle } from "../../features/toast/toastSlice";
 
 const boxStyle = {
   display: "flex",
@@ -170,6 +172,7 @@ const TeacherEditDetail = () => {
   });
   const [imageURL, setImageURL] = useState("");
   const [isCourseEdit, setIsCourseEdit] = useState(false);
+  const [editCancelModalOpen, setEditCancelModalOpen] = useState(false);
 
   useEffect(() => {
     if (id || (id && posted && !posting) || (id && deleted && !deleting))
@@ -204,7 +207,6 @@ const TeacherEditDetail = () => {
 
   const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    console.log(name, checked);
 
     setConsult((prevSettings) => ({
       ...prevSettings,
@@ -232,13 +234,6 @@ const TeacherEditDetail = () => {
       price: 0,
       id: "",
     });
-    // if (id)
-    //   dispatch(
-    //     postCourseInfoAsync({
-    //       teacherId: id,
-    //       params: { name: updateCourse.name, price: updateCourse.price },
-    //     })
-    //   );
   };
 
   const handleEditCourse = (courseID: string) => {
@@ -262,17 +257,6 @@ const TeacherEditDetail = () => {
   };
 
   const handleSaveCourse = () => {
-    // if (id)
-    //   dispatch(
-    //     putCourseInfoAsync({
-    //       teacherId: id,
-    //       courseId: updateCourse.id,
-    //       params: {
-    //         name: updateCourse.name,
-    //         price: updateCourse.price,
-    //       },
-    //     })
-    //   );
     const tempCourses = registerCourses.map((course) => {
       if (course.id === updateCourse.id) {
         return {
@@ -294,7 +278,6 @@ const TeacherEditDetail = () => {
   };
 
   const handleDeleteCourse = (courseId: string) => {
-    // if (id) dispatch(deleteCourseInfoAsync({ teacherId: id, courseId }));
     const tempCourses = registerCourses.filter(
       (course) => course.id !== courseId
     );
@@ -319,8 +302,12 @@ const TeacherEditDetail = () => {
       addCourse(registerCourses, courses, id, dispatch);
       editCourse(registerCourses, courses, id, dispatch);
       deleteCourse(registerCourses, courses, id, dispatch);
+      dispatch(fetchCourseInfoAsync(id));
+      dispatch(fetchTeacherInfoAsync());
     }
+
     navigate(`/Teacher/TeacherDetail/${id}`);
+    dispatch(toggle());
   };
 
   const handleSubjectClick = (subject: string) => {
@@ -356,6 +343,11 @@ const TeacherEditDetail = () => {
       </>
     ) : (
       <>
+        <EditCancelModal
+          open={editCancelModalOpen}
+          handleClose={() => setEditCancelModalOpen(false)}
+          handleAction={handleRedirectPage}
+        />
         <ImageModal
           imageModalOpen={imageModalOpen}
           setImageModalOpen={setImageModalOpen}
@@ -594,7 +586,7 @@ const TeacherEditDetail = () => {
             </Box>
             <Box sx={editButtonStyle}>
               <PrimaryButton
-                handleAction={handleRedirectPage}
+                handleAction={() => setEditCancelModalOpen(true)}
                 title="キャンセル"
                 loading={false}
               />
