@@ -29,6 +29,8 @@ const tagBoxStyle = {
   width: "100%",
   display: "flex",
   justifyContent: "center",
+  flexWrap: "wrap",
+  gap: "5px",
 };
 
 interface Props {

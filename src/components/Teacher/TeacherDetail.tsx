@@ -23,6 +23,8 @@ import PrimaryButton from "../atoms/PrimaryButton";
 import SecondaryButton from "../atoms/SecondaryButton";
 import Tag from "../atoms/Tag";
 import Header from "../Common/Header";
+import Toast from "../Common/Toast";
+import { Subject } from "./AllSubjects";
 
 const boxStyle = {
   display: "flex",
@@ -41,6 +43,7 @@ const profileStyle = {
   borderRadius: "10px",
   paddingTop: "20px",
   paddingBottom: "20px",
+  paddingInline: "10px",
 };
 
 const detailBoxStyle = {
@@ -59,6 +62,8 @@ const tagBoxStyle = {
   width: "100%",
   display: "flex",
   justifyContent: "center",
+  flexWrap: "wrap",
+  gap: "5px",
 };
 
 const textBoxStyle = {
@@ -109,6 +114,7 @@ const TeacherDetail: React.FC = () => {
       </>
     ) : (
       <>
+        <Toast />
         <Header />
         <Box sx={boxStyle}>
           <Box sx={profileStyle}>
@@ -139,7 +145,10 @@ const TeacherDetail: React.FC = () => {
               </Box>
               <Box sx={tagBoxStyle}>
                 {teacher.subjects.map((subject) => (
-                  <Tag title={subject} key={subject} />
+                  <Tag
+                    title={Subject[subject as keyof typeof Subject]}
+                    key={subject}
+                  />
                 ))}
               </Box>
             </Box>
