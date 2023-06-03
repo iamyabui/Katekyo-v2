@@ -114,7 +114,10 @@ const TeacherDetail: React.FC = () => {
       </>
     ) : (
       <>
-        <Toast />
+        <Toast
+          successMessage="変更が保存されました！"
+          errorMessage="保存に失敗しました。"
+        />
         <Header />
         <Box sx={boxStyle}>
           <Box sx={profileStyle}>
@@ -126,7 +129,6 @@ const TeacherDetail: React.FC = () => {
                 width: 70,
                 height: 70,
                 borderRadius: "50%",
-                backgroundColor: "white",
               }}
             />
             <Typography>{teacher.name}</Typography>
@@ -144,12 +146,13 @@ const TeacherDetail: React.FC = () => {
                 <Typography>担当科目</Typography>
               </Box>
               <Box sx={tagBoxStyle}>
-                {teacher.subjects.map((subject) => (
-                  <Tag
-                    title={Subject[subject as keyof typeof Subject]}
-                    key={subject}
-                  />
-                ))}
+                {teacher.subjects.length > 0 &&
+                  teacher.subjects.map((subject) => (
+                    <Tag
+                      title={Subject[subject as keyof typeof Subject]}
+                      key={subject}
+                    />
+                  ))}
               </Box>
             </Box>
             <Box>
