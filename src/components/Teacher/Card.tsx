@@ -2,6 +2,7 @@ import { Avatar, Box, Typography } from "@mui/material";
 import React from "react";
 import { TeacherUser } from "../../Types";
 import Tag from "../atoms/Tag";
+import { Subject } from "./AllSubjects";
 
 const CardStyle = {
   width: "200px",
@@ -42,13 +43,16 @@ const Card = ({ handleClick, teacher }: Props) => {
   return (
     <Box onClick={handleClick}>
       <Box sx={CardStyle}>
-        <Avatar src="/images/yamada.png" alt="User Image" sx={AvatarStyle} />
+        <Avatar src={teacher.url} alt="User Image" sx={AvatarStyle} />
         <Typography>{teacher.name}</Typography>
         <Typography>{teacher.title}</Typography>
         <Box>
           <Box sx={tagBoxStyle}>
             {teacher.subjects.map((subject) => (
-              <Tag title={subject} key={subject} />
+              <Tag
+                title={Subject[subject as keyof typeof Subject]}
+                key={subject}
+              />
             ))}
           </Box>
         </Box>
