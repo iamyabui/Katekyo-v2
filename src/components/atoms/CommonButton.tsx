@@ -18,12 +18,15 @@ const ButtonStyle = {
 interface Props {
   title: string;
   onClick: () => void;
+  disabled?: boolean;
 }
 
-const CommonButton = ({ title, onClick }: Props) => {
+const CommonButton = ({ title, onClick, disabled = false }: Props) => {
   return (
     <Box onClick={onClick}>
-      <Button sx={ButtonStyle}>{title}</Button>
+      <Button sx={ButtonStyle} disabled={disabled}>
+        {title}
+      </Button>
     </Box>
   );
 };
