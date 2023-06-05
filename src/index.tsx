@@ -8,6 +8,9 @@ import Top from "./components/Teacher/Top";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import TeacherDetail from "./components/Teacher/TeacherDetail";
 import TeacherEditDetail from "./components/Teacher/TeacherEditDetail";
+import { RecoilRoot } from "recoil";
+import Chatroom from "./components/Teacher/Chatroom";
+import ChatroomDetail from "./components/Teacher/ChatroomDetail";
 
 const container = document.getElementById("root")!;
 const root = createRoot(container);
@@ -24,13 +27,23 @@ const router = createBrowserRouter([
     path: "/Teacher/TeacherEditDetail/:id",
     element: <TeacherEditDetail />,
   },
+  {
+    path: "/Teacher/Chatroom",
+    element: <Chatroom />,
+  },
+  {
+    path: "/Teacher/ChatroomDetail/:id",
+    element: <ChatroomDetail />,
+  },
 ]);
 
 root.render(
   <React.StrictMode>
-    <Provider store={store}>
-      <RouterProvider router={router} />
-    </Provider>
+    <RecoilRoot>
+      <Provider store={store}>
+        <RouterProvider router={router} />
+      </Provider>
+    </RecoilRoot>
   </React.StrictMode>
 );
 
